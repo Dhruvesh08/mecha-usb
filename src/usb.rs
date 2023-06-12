@@ -12,7 +12,7 @@ pub struct UsbPort {
 
 impl UsbPort {
     pub fn new(port_number: u32) -> UsbPort {
-        let role_path = format!("/sys/class/udc/ci_hdrc.{}.device/role", port_number);
+        let role_path = format!("/sys/class/udc/ci_hdrc.{}/device/role", port_number);
         UsbPort { role_path }
     }
 

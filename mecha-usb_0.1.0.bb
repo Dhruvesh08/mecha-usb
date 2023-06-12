@@ -8,10 +8,10 @@ inherit cargo
 # how to get mecha-usb could be as easy as but default to a git checkout:
 # SRC_URI += "crate://crates.io/mecha-usb/0.1.0"
 SRC_URI += "git://github.com/Dhruvesh08/mecha-usb.git;protocol=https;nobranch=1;branch=main"
-SRCREV = "88a77f463a2cdcc717bddd8bfda3974558105589"
+SRCREV = "af42f2bffbd0dff6b7b9494688bdc73047a3f965"
 S = "${WORKDIR}/git"
 CARGO_SRC_DIR = ""
-PV:append = ".AUTOINC+88a77f463a"
+PV:append = ".AUTOINC+af42f2bffb"
 
 # please note if you have entries that do not begin with crate://
 # you must change them to how that package can be fetched
