@@ -1,44 +1,44 @@
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{Read, Write, Error};
 
-enum UsbPortMode {
+pub enum UsbPortMode {
     Host,
     Gadget,
 }
 
 pub struct UsbPort {
-    role_path: String,
+   pub role_path: String,
 }
 
-impl UsbPort {
-    pub fn new(port_number: u32) -> UsbPort {
-        let role_path = format!("/sys/class/udc/ci_hdrc.{}/device/role", port_number);
-        UsbPort { role_path }
+pub trait UsbTrait {
+    fn set_device(&mut self, path: String) -> Result<(), Error>;
+    fn check_mode(&self) -> Result<String, Error>;
+    fn set_mode(&self, mode: UsbPortMode) -> Result<(), Error>;
+    fn set_gadget_mode(&self) -> Result<(), Error>;
+    fn set_host_mode(&self) -> Result<(), Error>;
+}
+
+impl UsbTrait for UsbPort {
+    fn set_device(&mut self, path: String) -> Result<(), Error> {
+        self.role_path = path;
+        Ok(())
     }
 
-    pub fn check_mode(&self) -> Result<String, std::io::Error> {
+    fn check_mode(&self) -> Result<String, Error> {
         let mut file = File::open(&self.role_path)?;
         let mut mode = String::new();
         file.read_to_string(&mut mode)?;
         match mode.trim() {
             "host" => Ok("host".to_string()),
             "gadget" => Ok("gadget".to_string()),
-            _ => Err(std::io::Error::new(
+            _ => Err(Error::new(
                 std::io::ErrorKind::InvalidData,
                 "Invalid mode",
             )),
         }
     }
 
-    pub fn set_host_mode(&self) -> Result<(), std::io::Error> {
-        self.set_mode(UsbPortMode::Host)
-    }
-
-    pub fn set_gadget_mode(&self) -> Result<(), std::io::Error> {
-        self.set_mode(UsbPortMode::Gadget)
-    }
-
-    fn set_mode(&self, mode: UsbPortMode) -> Result<(), std::io::Error> {
+    fn set_mode(&self, mode: UsbPortMode) -> Result<(), Error> {
         let mode_str = match mode {
             UsbPortMode::Host => "host",
             UsbPortMode::Gadget => "gadget",
@@ -46,5 +46,13 @@ impl UsbPort {
         let mut file = OpenOptions::new().write(true).open(&self.role_path)?;
         file.write_all(mode_str.as_bytes())?;
         Ok(())
+    }
+
+    fn set_gadget_mode(&self) -> Result<(), Error> {
+        self.set_mode(UsbPortMode::Gadget)
+    }
+
+    fn set_host_mode(&self) -> Result<(), Error> {
+        self.set_mode(UsbPortMode::Host)
     }
 }
